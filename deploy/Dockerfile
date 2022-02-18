@@ -43,11 +43,6 @@ RUN \
 # Generate latest ca-certificates
 
 FROM debian:buster-slim
-
-RUN \
-  apt update && \
-  apt install -y ca-certificates curl jq
-
 COPY --from=0 /src/out/executor /kaniko/executor
 COPY --from=0 /usr/local/bin/docker-credential-gcr /kaniko/docker-credential-gcr
 COPY --from=0 /usr/local/bin/docker-credential-ecr-login /kaniko/docker-credential-ecr-login
@@ -56,6 +51,8 @@ COPY --from=0 /kaniko/.docker /kaniko/.docker
 COPY files/nsswitch.conf /etc/nsswitch.conf
 ENV HOME /root
 ENV USER root
+RUN apt update && \
+  apt install -y ca-certificates curl jq
 ENV PATH /usr/local/bin:/kaniko
 ENV SSL_CERT_DIR=/kaniko/ssl/certs
 ENV DOCKER_CONFIG /kaniko/.docker/

@@ -43,14 +43,13 @@ RUN \
 
 # Generate latest ca-certificates
 
-FROM debian:buster-slim AS certs
+FROM debian:buster-slim
 
 RUN \
   apt update && \
-  apt install -y ca-certificates && \
+  apt install -y ca-certificates curl jq && \
   cat /etc/ssl/certs/* > /ca-certificates.crt
 
-FROM scratch
 COPY --from=0 /src/out/executor /kaniko/executor
 COPY --from=0 /src/out/warmer /kaniko/warmer
 COPY --from=0 /usr/local/bin/docker-credential-gcr /kaniko/docker-credential-gcr
@@ -63,18 +62,16 @@ COPY --from=busybox:1.32.0 /bin /busybox
 # Similar issues could be found in https://github.com/multiarch/qemu-user-static/issues/110#issuecomment-652951564.
 COPY --from=busybox:1.32.0 /*lib /lib
 # Declare /busybox as a volume to get it automatically in the path to ignore
-VOLUME /busybox
-
-COPY --from=certs /ca-certificates.crt /kaniko/ssl/certs/
 COPY --from=0 /kaniko/.docker /kaniko/.docker
 COPY files/nsswitch.conf /etc/nsswitch.conf
 ENV HOME /root
 ENV USER root
-ENV PATH /usr/local/bin:/kaniko:/busybox
+ENV PATH /usr/local/bin:/kaniko:/busybox:/usr/bin/
 ENV SSL_CERT_DIR=/kaniko/ssl/certs
 ENV DOCKER_CONFIG /kaniko/.docker/
 ENV DOCKER_CREDENTIAL_GCR_CONFIG /kaniko/.config/gcloud/docker_credential_gcr_config.json
 WORKDIR /workspace
 RUN ["/busybox/mkdir", "-p", "/bin"]
-RUN ["/busybox/ln", "-s", "/busybox/sh", "/bin/sh"]
+
+# RUN ["/busybox/ln", "-s", "/busybox/sh", "/bin/sh"]
 ENTRYPOINT ["/kaniko/executor"]
