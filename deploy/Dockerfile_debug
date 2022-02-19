@@ -48,7 +48,7 @@ FROM debian:buster-slim
 RUN \
   apt update && \
   apt install -y ca-certificates curl jq && \
-  cat /etc/ssl/certs/* > /ca-certificates.crt
+  cat /etc/ssl/certs/* > /kaniko/ssl/certs/
 
 COPY --from=0 /src/out/executor /kaniko/executor
 COPY --from=0 /src/out/warmer /kaniko/warmer
