@@ -44,7 +44,7 @@ RUN \
 # Generate latest ca-certificates
 
 FROM debian:buster-slim
-
+RUN mkdir -p /kaniko/ssl/certs/
 RUN \
   apt update && \
   apt install -y ca-certificates curl jq && \
